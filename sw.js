@@ -3,7 +3,7 @@
    auch bei schlechtem Empfang im Studio öffnet. Daten kommen weiterhin live aus PocketBase
    (anderer Ursprung, wird hier nie angefasst) – gespeichert wird also nur mit Verbindung.
    Bei jeder inhaltlichen Änderung an Dateien der Hülle VERSION hochzählen. */
-const VERSION = 'kw-1';
+const VERSION = 'kw-2';
 const SHELL = [
   './', 'index.html', 'login.html', 'kw-app.js', 'manifest.webmanifest',
   'ascensus.css', 'ascensus.js', 'pocketbase.umd.js', 'logo-wordmark.png',

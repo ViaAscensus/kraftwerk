@@ -806,6 +806,7 @@
     background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family:inherit; font-size:0.92rem; cursor:pointer; }
   .xh-row.plain{ cursor:default; }
   .xh-row small{ color: var(--text-dim); }
+  .coach-fix{ display:inline-block; margin-left:8px; font-size:0.7rem; color: var(--text-dim); border:1px solid var(--border-strong); border-radius:10px; padding:1px 7px; vertical-align:middle; }
   .xh-edit{ padding:12px 14px; margin:-2px 0 8px; background: var(--surface); border:1px solid var(--border-strong); border-radius: var(--radius); }
   .xh-edit .xh-fields{ display:flex; gap:10px; margin-bottom:10px; }
   .xh-edit label{ flex:1; font-size:0.75rem; color: var(--text-dim); display:block; }
@@ -2025,7 +2026,7 @@ const BODY_ASSETS = {"male":{"front":{"viewBox":"0 0 724 1448","outline":["M 309
         <div class="ex-sets">
           ${setRows(g).map(r => `
             <div class="entry">
-              <div class="entry-main"><span class="set-line">${escapeHtml(r.text.replace(/ · (leicht|okay|hart)$/, ''))}</span></div>
+              <div class="entry-main"><span class="set-line">${escapeHtml(r.text.replace(/ · (leicht|okay|hart)$/, ''))}</span>${r.e.vom_coach_geaendert ? '<span class="coach-fix">vom Coach korrigiert</span>' : ''}</div>
               <div class="entry-right">
                 ${isCardioEntry(r.e) ? '' : `<span class="tendenz-label ${r.e.tendenz}">
                   <span class="dot ${r.e.tendenz}"></span>
@@ -2082,9 +2083,9 @@ const BODY_ASSETS = {"male":{"front":{"viewBox":"0 0 724 1448","outline":["M 309
         if(!(r > 0)){ err.textContent = 'Bitte Wiederholungen eintragen.'; return; }
         const weight = w > 0 ? w : 0;
         try{
-          const rec = await pb.collection('trainingsbuch_entries').update(dayEditId, { weight, reps: r, tendenz: dayTendenz });
+          const rec = await pb.collection('trainingsbuch_entries').update(dayEditId, { weight, reps: r, tendenz: dayTendenz, vom_coach_geaendert: false });
           const e = entries.find(x => x.id === dayEditId);
-          if(e){ e.weight = 'weight' in rec ? rec.weight : weight; e.reps = 'reps' in rec ? rec.reps : r; e.tendenz = 'tendenz' in rec ? rec.tendenz : dayTendenz; }
+          if(e){ e.weight = 'weight' in rec ? rec.weight : weight; e.reps = 'reps' in rec ? rec.reps : r; e.tendenz = 'tendenz' in rec ? rec.tendenz : dayTendenz; e.vom_coach_geaendert = false; }
           dayEditId = null;
           updateExerciseList();
           renderDayDetail();
@@ -5318,7 +5319,7 @@ const BODY_ASSETS = {"male":{"front":{"viewBox":"0 0 724 1448","outline":["M 309
       const t = cardio ? '' : ` · <small>${escapeHtml(e.tendenz || '')}</small>`;
       html += cardio
         ? `<div class="xh-row plain"><span>Einheit ${i + 1} · ${escapeHtml(xhSetLine(e))}</span></div>`
-        : `<button type="button" class="xh-row" data-xh-id="${e.id}"><span>Satz ${i + 1} · ${escapeHtml(xhSetLine(e))}${t}</span><small>ändern ›</small></button>`;
+        : `<button type="button" class="xh-row" data-xh-id="${e.id}"><span>Satz ${i + 1} · ${escapeHtml(xhSetLine(e))}${t}${e.vom_coach_geaendert ? ' · <small class="coach-fix">vom Coach korrigiert</small>' : ''}</span><small>ändern ›</small></button>`;
       if(xhEditId === e.id && !cardio){
         html += `<div class="xh-edit" data-xh-edit="${e.id}">
           <div class="xh-fields">
@@ -5449,9 +5450,9 @@ const BODY_ASSETS = {"male":{"front":{"viewBox":"0 0 724 1448","outline":["M 309
       if(!(r > 0)){ err.textContent = 'Bitte Wiederholungen eintragen.'; return; }
       const weight = w > 0 ? w : 0;
       try{
-        const rec = await pb.collection('trainingsbuch_entries').update(id, { weight, reps: r, tendenz: xhTendenz });
+        const rec = await pb.collection('trainingsbuch_entries').update(id, { weight, reps: r, tendenz: xhTendenz, vom_coach_geaendert: false });
         const e = entries.find(x => x.id === id);
-        if(e){ e.weight = 'weight' in rec ? rec.weight : weight; e.reps = 'reps' in rec ? rec.reps : r; e.tendenz = 'tendenz' in rec ? rec.tendenz : xhTendenz; }
+        if(e){ e.weight = 'weight' in rec ? rec.weight : weight; e.reps = 'reps' in rec ? rec.reps : r; e.tendenz = 'tendenz' in rec ? rec.tendenz : xhTendenz; e.vom_coach_geaendert = false; }
         xhEditId = null;
         await xhAfterChange();
       }catch(e){ console.error(e); err.textContent = 'Änderung konnte nicht gespeichert werden.'; }
