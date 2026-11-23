@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Anmelden – Kraftwerk</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#16171a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kraftwerk">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<script src="pocketbase.umd.js"></script>
+<script src="kw-app.js" defer></script>
+<style>
+  @font-face{ font-family: Inter; src: url(Inter-Variable.woff2) format("woff2"); font-weight:100 900; font-style:normal; font-display:swap; }
+  :root{ --bg:#16171a; --surface:#1f2119; --border:rgba(242,241,237,0.12); --text:#f2f1ed; --dim:#9a9ca5; --accent:#556B4E; --error:#e4572e; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; min-height:100%; }
+  body{
+    background:var(--bg); color:var(--text); font-family:Inter,system-ui,-apple-system,sans-serif;
+    min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-tap-highlight-color:transparent;
+  }
+  main{ flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .card{ width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:32px 26px; }
+  .brand{ display:flex; align-items:center; gap:14px; margin-bottom:26px; }
+  .brand img{ width:48px; height:48px; border-radius:10px; }
+  .brand h1{ margin:0; font-size:1.5rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; }
+  .brand p{ margin:2px 0 0; font-size:0.8rem; color:var(--dim); }
+  label{ display:block; font-size:0.85rem; margin-bottom:6px; }
+  input{
+    width:100%; padding:12px; margin-bottom:16px; border:1px solid rgba(242,241,237,0.25); border-radius:6px;
+    background:var(--bg); color:var(--text); font-family:inherit; font-size:16px; /* 16 px: iOS zoomt sonst ins Feld */
+  }
+  input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  button{ width:100%; padding:14px 0; border:none; border-radius:6px; background:var(--accent); color:#fff; font-family:inherit; font-size:0.95rem; font-weight:600; cursor:pointer; }
+  button:disabled{ opacity:0.6; cursor:default; }
+  .linkbtn{ background:none; padding:0; margin-top:14px; width:auto; color:var(--text); font-size:0.85rem; font-weight:400; text-decoration:underline; }
+  .msg{ font-size:0.85rem; margin-top:14px; min-height:1.2em; }
+  .msg.error{ color:var(--error); } .msg.success{ color:#6fcf97; }
+  .hint{ margin-top:22px; font-size:0.8rem; color:var(--dim); line-height:1.5; }
+  #resetForm{ display:none; }
+  p.lead{ font-size:0.88rem; line-height:1.5; margin:0 0 20px; color:var(--dim); }
+  [data-kw-install]{ margin-top:18px; font-size:0.82rem; color:var(--dim); line-height:1.5; }
+  .kw-install-btn{ background:transparent; border:1px solid rgba(242,241,237,0.3); color:var(--text); font-weight:500; }
+  .kw-install-ios strong{ color:var(--text); font-weight:600; }
+  footer{ padding:14px 20px 18px; text-align:center; font-size:0.78rem; color:var(--dim); }
+  footer a{ color:inherit; text-decoration:underline; margin:0 8px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="">
+      <div><h1>Kraftwerk</h1><p>Dein Trainingsbuch von ASCENSUS</p></div>
+    </div>
+    <div class="msg success" id="topMsg"></div>
+
+    <form id="loginForm">
+      <label for="email">E-Mail</label>
+      <input type="email" id="email" name="username" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <label for="pw">Passwort</label>
+      <input type="password" id="pw" name="password" required autocomplete="current-password">
+      <button type="submit" id="submitBtn">Einloggen</button>
+      <div class="msg" id="msg" role="alert"></div>
+      <button type="button" class="linkbtn" id="showResetBtn">Passwort vergessen?</button>
+    </form>
+
+    <form id="resetForm">
+      <p class="lead">Trag Deine E-Mail-Adresse ein, wir schicken Dir einen Link zum Zurücksetzen.</p>
+      <label for="resetEmail">E-Mail</label>
+      <input type="email" id="resetEmail" name="email" required autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <button type="submit" id="resetSubmitBtn">Link anfordern</button>
+      <div class="msg" id="resetMsg"></div>
+      <button type="button" class="linkbtn" id="showLoginBtn">Zurück zum Login</button>
+    </form>
+
+    <p class="hint" id="inviteHint">Du nutzt dieselben Zugangsdaten wie im Mitgliederbereich auf ascensus.fit. Noch keinen Zugang? Du bekommst eine persönliche Einladung von Deinem Coach per E-Mail.</p>
+    <div data-kw-install hidden></div>
+  </div>
+</main>
+<footer>
+  <a href="https://ascensus.fit/impressum.html" target="_blank" rel="noopener">Impressum</a>
+  <a href="https://ascensus.fit/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+</footer>
+
+<script>
+  const pb = new PocketBase('https://pb.ascensus.fit');
+  if (pb.authStore.isValid) { window.location.replace('index.html'); }
+
+  const form = document.getElementById('loginForm');
+  const msg = document.getElementById('msg');
+  const submitBtn = document.getElementById('submitBtn');
+  const resetForm = document.getElementById('resetForm');
+  const resetMsg = document.getElementById('resetMsg');
+  const resetSubmitBtn = document.getElementById('resetSubmitBtn');
+  const inviteHint = document.getElementById('inviteHint');
+
+  if (new URLSearchParams(window.location.search).get('abgelaufen') === '1') {
+    document.getElementById('topMsg').textContent = 'Deine Anmeldung ist abgelaufen. Bitte melde Dich neu an.';
+  }
+
+  function showReset(){ form.style.display='none'; inviteHint.style.display='none'; resetForm.style.display='block'; }
+  function showLogin(){ resetForm.style.display='none'; form.style.display='block'; inviteHint.style.display='block'; }
+  document.getElementById('showResetBtn').addEventListener('click', showReset);
+  document.getElementById('showLoginBtn').addEventListener('click', showLogin);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = ''; msg.classList.remove('error');
+    submitBtn.disabled = true; submitBtn.textContent = 'Einen Moment …';
+    const email = document.getElementById('email').value.trim();
+    const pw = document.getElementById('pw').value;
+    try {
+      await pb.collection('members').authWithPassword(email, pw);
+      // Zugangsdaten dem Passwortmanager übergeben (Chrome/Android), damit der Fingerabdruck sie später einfüllt
+      try{
+        if(window.PasswordCredential && navigator.credentials && navigator.credentials.store){
+          await navigator.credentials.store(new PasswordCredential({ id: email, password: pw, name: email }));
+        }
+      }catch(_){ /* nicht schlimm */ }
+      window.location.replace('index.html');
+    } catch (err) {
+      // 400 = falsche Daten; alles andere (0 = keine Verbindung) ehrlich benennen
+      msg.textContent = (err && err.status === 400) ? 'E-Mail oder Passwort ist nicht korrekt.'
+        : (err && err.status === 0) ? 'Keine Verbindung. Bitte prüfe Dein Netz und versuche es erneut.'
+        : 'Anmeldung gerade nicht möglich. Bitte versuche es gleich noch einmal.';
+      msg.classList.add('error');
+      submitBtn.disabled = false; submitBtn.textContent = 'Einloggen';
+    }
+  });
+
+  resetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resetMsg.textContent = ''; resetMsg.classList.remove('error');
+    resetSubmitBtn.disabled = true; resetSubmitBtn.textContent = 'Einen Moment …';
+    try { await pb.collection('members').requestPasswordReset(document.getElementById('resetEmail').value.trim()); }
+    catch (err) { /* bewusst ignoriert: keine Auskunft, ob die E-Mail existiert */ }
+    resetMsg.textContent = 'Falls ein Konto mit dieser E-Mail existiert, hast Du in Kürze eine Mail mit einem Link erhalten.';
+    resetMsg.classList.add('success');
+    resetSubmitBtn.disabled = false; resetSubmitBtn.textContent = 'Link anfordern';
+  });
+</script>
+</body>
+</html>
