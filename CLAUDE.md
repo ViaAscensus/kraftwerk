@@ -82,6 +82,12 @@ server {
         try_files $uri $uri/ =404;
     }
 
+    # nginx:alpine kennt die Endung .webmanifest nicht, ohne das kommt octet-stream
+    location = /manifest.webmanifest {
+        default_type application/manifest+json;
+        add_header Cache-Control "no-cache" always;
+    }
+
     # Der Service Worker darf nie lange im Cache liegen, sonst kommen Updates nicht an
     location = /sw.js {
         add_header Cache-Control "no-cache" always;
